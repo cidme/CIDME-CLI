@@ -1,10 +1,11 @@
 {
   "name": "cidme-cli",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "CLI for CIDME",
   "main": "cli.js",
   "scripts": {
-    "cidme-cli": "./dist/cli.js"
+    "cidme-cli": "./dist/cli.js",
+    "test": "cd dist;standard"
   },
   "author": {
     "name": "Joe Thielen",
@@ -15,9 +16,12 @@
   "license": "MIT",
   "repository": "github:cidme/cidme-cli",
   "bugs": "https://github.com/cidme/cidme-cli/issues",
+  "devDependencies": {
+    "standard": "^12.0.1"
+  },
   "dependencies": {
-    "cidme": "^0.2.0",
     "ajv": "^6.5.3",
+    "cidme": "^0.2.2",
     "commander": "^2.18.0",
     "inquirer": "^6.2.0",
     "uuidjs": "^4.0.3"
