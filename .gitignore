@@ -1,0 +1,6 @@
+/OLD
+/dist/OLD
+/node_modules
+package-lock.json
+*.swp
+/dist/*.swp
