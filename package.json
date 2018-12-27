@@ -1,10 +1,11 @@
 {
   "name": "cidme-cli",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "CLI for CIDME",
-  "main": "cli.js",
+  "main": "dist/cidme-cli.js",
+  "bin": "./dist/cidme-cli.js",
   "scripts": {
-    "cidme-cli": "./dist/cli.js",
+    "cidme-cli": "./dist/cidme-cli.js",
     "test": "cd dist;standard"
   },
   "author": {
@@ -21,7 +22,6 @@
   },
   "dependencies": {
     "ajv": "^6.5.3",
-    "cidme": "^0.2.2",
     "commander": "^2.18.0",
     "inquirer": "^6.2.0",
     "uuidjs": "^4.0.3"
