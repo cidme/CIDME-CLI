@@ -208,7 +208,7 @@ const viewResource = (data, level, options) => {
 }
 
 program
-  .version('0.3.2')
+  .version('0.3.3')
   .description('CLI for CIDME')
   .option('-i, --input <filename>', 'File to read input from, for applicable commands.')
   .option('-n, --nometadata', 'If creating/updating resources, do not automatically create CreatedMetadata or UpdatedMetadata resources.  If viewing resources, do not display CreatedMetadata or UpdatedMetadata resources.')
