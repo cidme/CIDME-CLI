@@ -1,6 +1,6 @@
 {
   "name": "cidme-cli",
-  "version": "0.3.99",
+  "version": "0.4.0",
   "description": "CLI for CIDME",
   "main": "dist/cidme-cli.js",
   "bin": "./dist/cidme-cli.js",
