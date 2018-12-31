@@ -1,5 +1,7 @@
 # CIDME-CLI
 
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+
 Node-based CLI for CIDME (ALPHA!  INCOMPLETE!).  Uses the [CIDME-JS](http://github.com/cidme/CIDME-JS) package.
 
 ## **Install:**
@@ -10,10 +12,15 @@ Node-based CLI for CIDME (ALPHA!  INCOMPLETE!).  Uses the [CIDME-JS](http://gith
 * If you wish to install the CLI for use globally do this (_as root or sudo_):
   ```sh
   npm link cidme-cli
-* **TODO**: Add NPM link functionality to make script available for general CLI use.
+  ```
+  * **NOTE:** If you do not link the CLI globally you will have to manually install and/or use the ```dist/cidme-cli.js``` script directly.
 
 
 ## **Basic Usage:**
+
+
+**NOTE:** If you did not link the CLI globally you will have to adjust the commands below to use the ```cidme-cli.js``` script itself.
+
 
 Get help:
 ```sh
