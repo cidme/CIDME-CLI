@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+/**
+ * @file CIDME CLI using Node.  Currently supports CIDME specification version 0.2.0.
+ * @author Joe Thielen <joe@joethielen.com>
+ * @copyright Joe Thielen 2018
+ * @license MIT
+ */
 
 'use strict'
 
@@ -45,7 +51,7 @@ const createEntityAndEntityContext = (entityContextsNum, createMetadata, creator
   return data
 }
 
-const createResource = (resourceType, parentId, cidmeResourceJSON, createMetadata, creatorId) => {
+const createResource = (resourceType, parentId, cidmeResourceJSON, createMetadata, creatorId, rdfData) => {
   if (!resourceType) {
     console.log('ERROR: Resource type to create must be specified.')
     return false
@@ -54,12 +60,23 @@ const createResource = (resourceType, parentId, cidmeResourceJSON, createMetadat
   let newOptions = []
   newOptions.createMetadata = createMetadata
   newOptions.creatorId = creatorId
+  newOptions.data = false
+  if (!rdfData) {} else {
+    try {
+      var rdfDataJson = JSON.parse(rdfData)
+    } catch (err) {
+      console.log('The provided RDF JSON string is not valid.')
+      return false
+    }
+
+    newOptions.data = rdfDataJson
+  }
 
   let data = false
   if (resourceType === 'Entity') {
     data = cidme.createEntityResource(newOptions)
   } else if (resourceType === 'MetadataGroup') {
-    data = cidme.createMetadataGroupResource(parentId)
+    data = cidme.createMetadataGroupResource(parentId, newOptions)
   } else if (resourceType === 'EntityContext') {
     data = cidme.createEntityContextResource(parentId, newOptions)
   } else if (resourceType === 'EntityContextLinkGroup') {
@@ -67,7 +84,7 @@ const createResource = (resourceType, parentId, cidmeResourceJSON, createMetadat
   } else if (resourceType === 'EntityContextDataGroup') {
     data = cidme.createEntityContextDataGroupResource(parentId, newOptions)
   } else {
-    console.log('ERROR: Incorrect Resource type specified.')
+    console.log('ERROR: Incorrect Resource type specified.  Correct types are Entity, EntityContext, EntityContextLinkGroup, EntityContextDataGroup, or MetadataGroup.')
     return false
   }
 
@@ -130,7 +147,11 @@ const viewResource = (data, level, options) => {
         if (cidmeResource['data'][i].hasOwnProperty('@type')) {
           extraInfo += 'TYPE: ' + cidmeResource['data'][i]['@type'] + ' '
 
-          if (cidmeResource['data'][i]['@type'] === 'CreatedMetadata') {
+          if (
+            cidmeResource['data'][i]['@type'] === 'CreatedMetadata' ||
+            cidmeResource['data'][i]['@type'] === 'ModifiedMetadata' ||
+            cidmeResource['data'][i]['@type'] === 'LastModifiedMetadata'
+          ) {
             doNotShowMetadata = true
           }
         }
@@ -160,11 +181,16 @@ const viewResource = (data, level, options) => {
             !noMetadata
         )
   ) {
-    for (let i = 0; i < cidmeResource['data'].length; i++) {
-      for (var property in cidmeResource['data'][i]) {
-        if (cidmeResource['data'][i].hasOwnProperty(property)) {
-          if (property.substring(0, 1) !== '@') {
-            console.log('  '.repeat(level) + property + ': ' + cidmeResource['data'][i][property])
+    if (
+      cidmeResource.hasOwnProperty('data') &&
+        cidmeResource['data'].length > 0
+    ) {
+      for (let i = 0; i < cidmeResource['data'].length; i++) {
+        for (var property in cidmeResource['data'][i]) {
+          if (cidmeResource['data'][i].hasOwnProperty(property)) {
+            if (property.substring(0, 1) !== '@') {
+              console.log('  '.repeat(level) + property + ': ' + cidmeResource['data'][i][property])
+            }
           }
         }
       }
@@ -208,13 +234,15 @@ const viewResource = (data, level, options) => {
 }
 
 program
-  .version('0.3.4')
+  .version('0.3.5')
   .description('CLI for CIDME')
+  .option('-c, --creatorId <creatorId>', 'A CIDME resource ID to use as creator ID for applicable metadata.')
+  .option('-d, --data <data>', 'A JSON-LD resource string representing RDF data.  Will be included if creating a MetadataGroup, EntityContextLinkGroup, or EntityContextDataGroup resource.')
+  .option('-f, --dataFile <filename>', 'A file containing a JSON-LD resource string representing RDF data.  Will be included if creating a MetadataGroup, EntityContextLinkGroup, or EntityContextDataGroup resource.')
   .option('-i, --input <filename>', 'File to read input from, for applicable commands.')
-  .option('-n, --nometadata', 'If creating/updating resources, do not automatically create CreatedMetadata or UpdatedMetadata resources.  If viewing resources, do not display CreatedMetadata or UpdatedMetadata resources.')
+  .option('-n, --nometadata', 'If creating/updating resources, do not automatically create Created/Modified/LastModified Metadata resources.  If viewing resources, do not display these resources.')
   .option('-o, --output <filename>', 'File to write output to, for applicable commands.')
   .option('-p, --parent <parentId>', 'A CIDME resource ID to use as parentID, for applicable commands.')
-  .option('-c, --creatorId <creatorId>', 'A CIDME resource ID to use as creator ID for applicable metadata.')
 
 // DO NOT SHOW HELP HERE UNTIL AFTER ALL COMMANDS ARE DEFINED, OTHERWISE
 // COMMANDS WILL BE SHOWN.
@@ -235,7 +263,29 @@ program
       let creatorId = false
       if (!program.creatorId) {} else { creatorId = program.creatorId }
 
-      let data = createResource(resourceType, program.parent, null, createMetadata, creatorId)
+      let rdfData = false
+      if (!program.dataFile) {
+        if (!program.data) {} else { rdfData = program.data }
+      } else {
+        let fileContents = false
+
+        if (fs.existsSync(program.dataFile)) {
+          fileContents = fs.readFileSync(program.dataFile, 'utf8')
+        } else {
+          console.log('ERROR: The specified RDF data file does not exist!')
+        }
+
+        try {
+          rdfData = JSON.parse(fileContents)
+        } catch (err) {
+          console.log('The provided RDF data file is not valid JSON.')
+          return false
+        }
+
+        rdfData = JSON.stringify(rdfData)
+      }
+
+      let data = createResource(resourceType, program.parent, null, createMetadata, creatorId, rdfData)
 
       if (!data) {
         console.log('ERROR: An error occured creating new CIDME resource.')
@@ -251,7 +301,7 @@ program
           if (fs.existsSync(program.input)) {
             fileContents = fs.readFileSync(program.input, 'utf8')
 
-            let newData = createResource(resourceType, program.parent, fileContents, createMetadata, creatorId)
+            let newData = createResource(resourceType, program.parent, fileContents, createMetadata, creatorId, rdfData)
 
             if (!newData) {
               console.log('ERROR: An error occured creating new CIDME resource.')
