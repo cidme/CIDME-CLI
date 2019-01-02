@@ -209,7 +209,7 @@ const viewResource = (data, level, options) => {
 
   if (cidmeResource.hasOwnProperty('entityContexts') && cidmeResource['entityContexts'].length > 0) {
     console.log('')
-    console.log(' '.repeat(level - 1) + 'CONTEXTS:')
+    console.log('    '.repeat(level - 1) + 'CONTEXTS:')
 
     for (let i = 0; i < cidmeResource['entityContexts'].length; i++) {
       viewResource(JSON.stringify(cidmeResource['entityContexts'][i]), (level + 1), options)
