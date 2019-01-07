@@ -175,11 +175,15 @@ const viewResource = (data, level, options) => {
 
   // Show metadata data
   if (
-    cidmeResource['@type'] === 'MetadataGroup' &&
-        (
-          !doNotShowMetadata ||
+    cidmeResource['@type'] === 'EntityContextDataGroup' ||
+    cidmeResource['@type'] === 'EntityContextLinkGroup' ||
+    (
+      cidmeResource['@type'] === 'MetadataGroup' &&
+      (
+        !doNotShowMetadata ||
             !noMetadata
-        )
+      )
+    )
   ) {
     if (
       cidmeResource.hasOwnProperty('data') &&
@@ -234,7 +238,7 @@ const viewResource = (data, level, options) => {
 }
 
 program
-  .version('0.4.0')
+  .version('0.4.1')
   .description('CLI for CIDME')
   .option('-c, --creatorId <creatorId>', 'A CIDME resource ID to use as creator ID for applicable metadata.')
   .option('-d, --data <data>', 'A JSON-LD resource string representing RDF data.  Will be included if creating a MetadataGroup, EntityContextLinkGroup, or EntityContextDataGroup resource.')
