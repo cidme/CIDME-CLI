@@ -211,12 +211,9 @@ const viewResource = (data, level, options) => {
     }
   }
 
-  if (cidmeResource.hasOwnProperty('entityContexts') && cidmeResource['entityContexts'].length > 0) {
-    console.log('')
-    console.log('    '.repeat(level - 1) + 'CONTEXTS:')
-
-    for (let i = 0; i < cidmeResource['entityContexts'].length; i++) {
-      viewResource(JSON.stringify(cidmeResource['entityContexts'][i]), (level + 1), options)
+  if (cidmeResource.hasOwnProperty('entityContextData') && cidmeResource['entityContextData'].length > 0) {
+    for (let i = 0; i < cidmeResource['entityContextData'].length; i++) {
+      viewResource(JSON.stringify(cidmeResource['entityContextData'][i]), (level + 1), options)
     }
   }
 
@@ -226,9 +223,12 @@ const viewResource = (data, level, options) => {
     }
   }
 
-  if (cidmeResource.hasOwnProperty('entityContextData') && cidmeResource['entityContextData'].length > 0) {
-    for (let i = 0; i < cidmeResource['entityContextData'].length; i++) {
-      viewResource(JSON.stringify(cidmeResource['entityContextData'][i]), (level + 1), options)
+  if (cidmeResource.hasOwnProperty('entityContexts') && cidmeResource['entityContexts'].length > 0) {
+    console.log('')
+    console.log('    '.repeat(level - 1) + 'CONTEXTS:')
+
+    for (let i = 0; i < cidmeResource['entityContexts'].length; i++) {
+      viewResource(JSON.stringify(cidmeResource['entityContexts'][i]), (level + 1), options)
     }
   }
 
@@ -238,7 +238,7 @@ const viewResource = (data, level, options) => {
 }
 
 program
-  .version('0.4.1')
+  .version('0.4.2')
   .description('CLI for CIDME')
   .option('-c, --creatorId <creatorId>', 'A CIDME resource ID to use as creator ID for applicable metadata.')
   .option('-d, --data <data>', 'A JSON-LD resource string representing RDF data.  Will be included if creating a MetadataGroup, EntityContextLinkGroup, or EntityContextDataGroup resource.')
