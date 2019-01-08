@@ -1,0 +1,1 @@
+CIDME-CLI logo directory.
