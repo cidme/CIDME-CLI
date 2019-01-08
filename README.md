@@ -1,3 +1,9 @@
+![CIDME project banner logo - dual](logos/cidme-banner_logo-dual-750x150.png "CIDME project banner logo - dual")
+![CIDME CLI Implementation QR code - cidme://public/EntityContext/dcb2c99b-2fd2-4bb4-925d-32ff534705f3](logos/cidme-cli_implementation-qr_code-350x350.png "CIDME CLI Implementation QR code - cidme://public/EntityContext/dcb2c99b-2fd2-4bb4-925d-32ff534705f3")
+
+CIDME-CLI Implementation CIDME ID/URL: _cidme://public/EntityContext/dcb2c99b-2fd2-4bb4-925d-32ff534705f3_
+
+
 # CIDME-CLI
 
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
