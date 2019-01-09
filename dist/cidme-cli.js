@@ -9,7 +9,14 @@
 'use strict'
 
 const program = require('commander')
+const os = require('os')
 let fs = require('fs')
+
+let entityColor = 'lightblue'
+let entityContextColor = 'green'
+// let metadataGroupColor = 'white'
+let entityContextLinkGroupColor = 'orange'
+let entityContextDataGroupColor = 'pink'
 
 /* ************************************************************************** */
 // Init AJV JSON Validator
@@ -107,38 +114,61 @@ const viewResource = (data, level, options) => {
 
   if (!level || isNaN(level)) { level = 1 }
 
+  let returnData = []
+  let returnedData = null
+
+  let gvData = []
+  let gvDataExtra = []
+
   let noMetadata = false
+  let gvGen = false
+  let gvParent = false
+  let gvNewParent = false
   if (!options) {} else {
     if (!options.noMetadata) {} else { noMetadata = true }
+    if (!options.gvGen) {} else { gvGen = true }
+    if (!options.gvParent) {} else { gvParent = options.gvParent }
   }
+
+  let extraInfo = ''
+  let doNotShowMetadata = false
+
+  let dashChar = ''
+
+  let tempGvData = ''
 
   try {
     var cidmeResource = JSON.parse(data)
   } catch (err) {
-    console.log('The provided CIDME resource JSON string is not valid.')
+    if (!gvGen) {
+      console.log('The provided CIDME resource JSON string is not valid.')
+    }
     return false
   }
 
-  let dashChar = ''
+  gvNewParent = cidmeResource['@type'] + '_' + cidme.parseCidmeUri(cidmeResource['@id'])['id'].replace(/-/g, '')
 
   if (!cidme.validate(cidmeResource)) {
-    console.log('The provided CIDME resource JSON string is not valid.')
+    if (!gvGen) {
+      console.log('The provided CIDME resource JSON string is not valid.')
+    }
     return false
   }
 
   if (cidmeResource['@type'] === 'Entity') {
-    console.log(' '.repeat(level - 1) + '-------------------------------')
+    if (!gvGen) {
+      console.log(' '.repeat(level - 1) + '-------------------------------')
+    }
     dashChar = ''
   } else {
     dashChar = '- '
   }
 
   if (cidmeResource['@type'] === 'EntityContext') {
-    console.log('')
+    if (!gvGen) {
+      console.log('')
+    }
   }
-
-  let extraInfo = ''
-  let doNotShowMetadata = false
 
   // If this is a metadata resource, see if it has a @type in the data
   if (cidmeResource['@type'] === 'MetadataGroup') {
@@ -146,6 +176,7 @@ const viewResource = (data, level, options) => {
       for (let i = 0; i < cidmeResource['data'].length; i++) {
         if (cidmeResource['data'][i].hasOwnProperty('@type')) {
           extraInfo += 'TYPE: ' + cidmeResource['data'][i]['@type'] + ' '
+          gvDataExtra.push('TYPE: ' + cidmeResource['data'][i]['@type'])
 
           if (
             cidmeResource['data'][i]['@type'] === 'CreatedMetadata' ||
@@ -159,7 +190,7 @@ const viewResource = (data, level, options) => {
     }
   }
 
-  // Show Resource info
+  // Show Resource type & ID
   if (
     cidmeResource['@type'] !== 'MetadataGroup' ||
         (
@@ -170,7 +201,9 @@ const viewResource = (data, level, options) => {
             )
         )
   ) {
-    console.log('  '.repeat(level - 1) + dashChar + cidmeResource['@type'] + ': ' + extraInfo + '(' + cidmeResource['@id'] + ')')
+    if (!gvGen) {
+      console.log('  '.repeat(level - 1) + dashChar + cidmeResource['@type'] + ': ' + extraInfo + '(' + cidmeResource['@id'] + ')')
+    }
   }
 
   // Show metadata data
@@ -193,7 +226,11 @@ const viewResource = (data, level, options) => {
         for (var property in cidmeResource['data'][i]) {
           if (cidmeResource['data'][i].hasOwnProperty(property)) {
             if (property.substring(0, 1) !== '@') {
-              console.log('  '.repeat(level) + property + ': ' + cidmeResource['data'][i][property])
+              if (!gvGen) {
+                console.log('  '.repeat(level) + property + ': ' + cidmeResource['data'][i][property])
+              } else {
+                gvDataExtra.push(property + ': ' + cidmeResource['data'][i][property])
+              }
             }
           }
         }
@@ -201,44 +238,123 @@ const viewResource = (data, level, options) => {
     }
   }
 
+  // Add gv data
+  if (
+    gvGen &&
+      (
+        cidmeResource['@type'] !== 'MetadataGroup' ||
+        (
+          cidmeResource['@type'] === 'MetadataGroup' &&
+            (
+              !doNotShowMetadata ||
+                !noMetadata
+            )
+        )
+      )
+  ) {
+    for (let i = 0; i < gvDataExtra.length; i++) {
+      tempGvData += '|' + gvDataExtra[i]
+    }
+
+    if (cidmeResource['@type'] === 'Entity') {
+      gvData.push(gvNewParent + ' [shape=record, label="{<f0> Entity}", style=filled, fillcolor=' + entityColor + '];')
+    } else if (cidmeResource['@type'] === 'EntityContext') {
+      gvData.push(gvNewParent + ' [shape=record, label="{<f0> EntityContext}", style=filled, fillcolor=' + entityContextColor + '];')
+    } else if (cidmeResource['@type'] === 'EntityContextDataGroup') {
+      gvData.push(gvNewParent + ' [shape=record, label="{<f0> EntityContextDataGroup' + tempGvData + '}", style=filled, fillcolor=' + entityContextDataGroupColor + '];')
+    } else if (cidmeResource['@type'] === 'EntityContextLinkGroup') {
+      gvData.push(gvNewParent + ' [shape=record, label="{<f0> EntityContextLinkGroup' + tempGvData + '}", style=filled, fillcolor=' + entityContextLinkGroupColor + '];')
+    } else if (cidmeResource['@type'] === 'MetadataGroup') {
+      // gvData.push(gvNewParent + ' [shape=record, label="{<f0> MetadataGroup}", style=filled, fillcolor=' + metadataGroupColor + '];')
+      // gvData.push(gvNewParent + ' [shape=record, label="{<f0> MetadataGroup | ' + extraInfo + '}", style=filled, fillcolor=' + metadataGroupColor + '];')
+      gvData.push(gvNewParent + ' [shape=record, label="{<f0> MetadataGroup' + tempGvData + '}"];')
+    } else {
+      gvData.push(gvNewParent + ' [shape=record, label="{<f0> ' + cidmeResource['@type'] + '}"];')
+    }
+
+    if (!gvParent) {} else {
+      gvData.push(gvParent + ' -> ' + gvNewParent + ';')
+    }
+  }
+
   if (cidmeResource['@type'] === 'Entity') {
-    console.log('')
+    if (!gvGen) {
+      console.log('')
+    }
   }
 
   if (cidmeResource.hasOwnProperty('metadata') && cidmeResource['metadata'].length > 0) {
     for (let i = 0; i < cidmeResource['metadata'].length; i++) {
-      viewResource(JSON.stringify(cidmeResource['metadata'][i]), (level + 1), options)
+      options.gvParent = gvNewParent
+      returnedData = viewResource(JSON.stringify(cidmeResource['metadata'][i]), (level + 1), options)
+
+      if (gvGen) {
+        if (!returnedData.gvData) {} else {
+          gvData.push(...returnedData.gvData)
+        }
+      }
     }
   }
 
   if (cidmeResource.hasOwnProperty('entityContextData') && cidmeResource['entityContextData'].length > 0) {
     for (let i = 0; i < cidmeResource['entityContextData'].length; i++) {
-      viewResource(JSON.stringify(cidmeResource['entityContextData'][i]), (level + 1), options)
+      options.gvParent = gvNewParent
+      returnedData = viewResource(JSON.stringify(cidmeResource['entityContextData'][i]), (level + 1), options)
+
+      if (gvGen) {
+        if (!returnedData.gvData) {} else {
+          gvData.push(...returnedData.gvData)
+        }
+      }
     }
   }
 
   if (cidmeResource.hasOwnProperty('entityContextLinks') && cidmeResource['entityContextLinks'].length > 0) {
     for (let i = 0; i < cidmeResource['entityContextLinks'].length; i++) {
-      viewResource(JSON.stringify(cidmeResource['entityContextLinks'][i]), (level + 1), options)
+      options.gvParent = gvNewParent
+      returnedData = viewResource(JSON.stringify(cidmeResource['entityContextLinks'][i]), (level + 1), options)
+
+      if (gvGen) {
+        if (!returnedData.gvData) {} else {
+          gvData.push(...returnedData.gvData)
+        }
+      }
     }
   }
 
   if (cidmeResource.hasOwnProperty('entityContexts') && cidmeResource['entityContexts'].length > 0) {
-    console.log('')
-    console.log('    '.repeat(level - 1) + 'CONTEXTS:')
+    if (!gvGen) {
+      console.log('')
+      console.log('    '.repeat(level - 1) + 'CONTEXTS:')
+    }
 
     for (let i = 0; i < cidmeResource['entityContexts'].length; i++) {
-      viewResource(JSON.stringify(cidmeResource['entityContexts'][i]), (level + 1), options)
+      options.gvParent = gvNewParent
+      returnedData = viewResource(JSON.stringify(cidmeResource['entityContexts'][i]), (level + 1), options)
+
+      if (gvGen) {
+        if (!returnedData.gvData) {} else {
+          gvData.push(...returnedData.gvData)
+        }
+      }
     }
   }
 
   if (cidmeResource['@type'] === 'Entity') {
-    console.log(' '.repeat(level - 1) + '-------------------------------')
+    if (!gvGen) {
+      console.log(' '.repeat(level - 1) + '-------------------------------')
+    }
   }
+
+  if (gvGen) {
+    returnData.gvData = gvData
+  }
+
+  return returnData
 }
 
 program
-  .version('0.4.2')
+  .version('0.4.3')
   .description('CLI for CIDME')
   .option('-c, --creatorId <creatorId>', 'A CIDME resource ID to use as creator ID for applicable metadata.')
   .option('-d, --data <data>', 'A JSON-LD resource string representing RDF data.  Will be included if creating a MetadataGroup, EntityContextLinkGroup, or EntityContextDataGroup resource.')
@@ -380,6 +496,53 @@ program
     options.noMetadata = program.nometadata
 
     viewResource(cidmeResourceJsonString, 1, options)
+  })
+
+program
+  .command('genGraph')
+  .description('Generate a graphViz .dot formatted graph file.')
+  .action(() => {
+    let fileContents = false
+    let data = ''
+
+    let options = []
+    options.gvGen = true
+    options.noMetadata = program.nometadata
+
+    if (!program.input) {
+      console.log('ERROR: No input file specified.')
+    } else if (fs.existsSync(program.input)) {
+      fileContents = fs.readFileSync(program.input, 'utf8')
+    } else {
+      console.log('ERROR: The specified file does not exist!')
+    }
+
+    if (!fileContents) {
+      console.log('ERROR: An error occured while reading the contents of the specified file.')
+    } else {
+      let returnData = viewResource(fileContents, 1, options)
+
+      if (!returnData.gvData) {} else {
+        if (returnData.hasOwnProperty('gvData') && returnData['gvData'].length > 0) {
+          // console.log('digraph CIDME {')
+          data += 'digraph CIDME {' + os.EOL
+
+          for (let i = 0; i < returnData['gvData'].length; i++) {
+            // console.log(returnData.gvData[i])
+            data += returnData.gvData[i] + os.EOL
+          }
+
+          // console.log('}')
+          data += '}'
+        }
+      }
+    }
+
+    if (!program.output) {
+      console.log(data)
+    } else {
+      fs.writeFileSync(program.output, data, 'utf8')
+    }
   })
 
 // If no recognized option is given, show help.
