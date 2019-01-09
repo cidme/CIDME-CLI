@@ -83,3 +83,27 @@ There should now be a ```- EntityContextDataGroup:``` section under our _Entity 
 
 
 **TO BE CONTINUED...**
+
+
+## **Generate visual layout graph:**
+
+cidme-cli can be used to generate a _.dot_ file, which can be used by [graphviz](http://www.graphviz.org/) to generate an image (or even a _postscript_ file)!
+
+First generate the .dot file from your CIDME file:
+
+```sh
+cidme-cli genGraph -i test.json -o test.dot
+```
+
+Then use the ```dot``` program to generate an image:
+
+```sh
+dot -x -Tjpg test.dot -o test.jpg
+```
+
+To generate a postscript file instead:
+
+```sh
+dot -x -Tps test.dot -o test.ps
+```
+
