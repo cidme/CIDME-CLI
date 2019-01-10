@@ -209,7 +209,7 @@ const viewResource = (data, level, options) => {
     }
   }
 
-  // Show metadata data
+  // Show data properties
   if (
     cidmeResource['@type'] === 'EntityContextDataGroup' ||
     cidmeResource['@type'] === 'EntityContextLinkGroup' ||
@@ -230,7 +230,11 @@ const viewResource = (data, level, options) => {
           if (cidmeResource['data'][i].hasOwnProperty(property)) {
             if (property.substring(0, 1) !== '@') {
               if (!gvGen) {
-                console.log('  '.repeat(level) + property + ': ' + cidmeResource['data'][i][property])
+                if (typeof cidmeResource['data'][i][property] === 'object') {
+                  console.log('  '.repeat(level) + property + ': COMPLEX DATA OBJECT: ' + JSON.stringify(cidmeResource['data'][i][property]))
+                } else {
+                  console.log('  '.repeat(level) + property + ': ' + cidmeResource['data'][i][property])
+                }
               } else {
                 gvDataExtra.push(property + ': ' + cidmeResource['data'][i][property])
               }
@@ -357,7 +361,7 @@ const viewResource = (data, level, options) => {
 }
 
 program
-  .version('0.4.4')
+  .version('0.4.5')
   .description('CLI for CIDME')
   .option('-c, --creatorId <creatorId>', 'A CIDME resource ID to use as creator ID for applicable metadata.')
   .option('-d, --data <data>', 'A JSON-LD resource string representing RDF data.  Will be included if creating a MetadataGroup, EntityContextLinkGroup, or EntityContextDataGroup resource.')
