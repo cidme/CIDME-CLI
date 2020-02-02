@@ -4,3 +4,4 @@
 package-lock.json
 *.swp
 /dist/*.swp
+cidme-cli.code-workspace

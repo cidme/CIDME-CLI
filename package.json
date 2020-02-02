@@ -1,30 +1,30 @@
 {
-  "name": "cidme-cli",
-  "version": "0.4.5",
-  "description": "CLI for CIDME",
-  "main": "dist/cidme-cli.js",
-  "bin": "./dist/cidme-cli.js",
-  "scripts": {
-    "cidme-cli": "./dist/cidme-cli.js",
-    "test": "cd dist;standard"
-  },
-  "author": {
-    "name": "Joe Thielen",
-    "email": "<joe@joethielen.com>",
-    "url": "https://github.com/joethielen"
-  },
-  "homepage": "http://cidme.net",
-  "license": "MIT",
-  "repository": "github:cidme/cidme-cli",
-  "bugs": "https://github.com/cidme/cidme-cli/issues",
-  "devDependencies": {
-    "standard": "^12.0.1"
-  },
-  "dependencies": {
-    "ajv": "^6.5.3",
-    "cidme": "^0.4.2",
-    "commander": "^2.18.0",
-    "inquirer": "^6.2.0",
-    "uuidjs": "^4.0.3"
-  }
+    "name": "cidme-cli",
+    "version": "0.5.0",
+    "description": "CLI for CIDME",
+    "main": "dist/cidme-cli.js",
+    "bin": "./dist/cidme-cli.js",
+    "scripts": {
+        "cidme-cli": "./dist/cidme-cli.js",
+        "test": "cd dist;standard"
+    },
+    "author": {
+        "name": "Joe Thielen",
+        "email": "joe@joethielen.com",
+        "url": "https://github.com/joethielen"
+    },
+    "homepage": "http://cidme.net",
+    "license": "MIT",
+    "repository": "github:cidme/cidme-cli",
+    "bugs": "https://github.com/cidme/cidme-cli/issues",
+    "devDependencies": {
+        "standard": "^12.0.1"
+    },
+    "dependencies": {
+        "ajv": "^6.5.3",
+        "cidme": "^0.5.0",
+        "commander": "^2.18.0",
+        "inquirer": "^6.2.0",
+        "uuidjs": "^4.0.3"
+    }
 }
