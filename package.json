@@ -1,6 +1,6 @@
 {
     "name": "cidme-cli",
-    "version": "0.5.0",
+    "version": "0.6.1",
     "description": "CLI for CIDME",
     "main": "dist/cidme-cli.js",
     "bin": "./dist/cidme-cli.js",
@@ -21,10 +21,14 @@
         "standard": "^12.0.1"
     },
     "dependencies": {
-        "ajv": "^6.5.3",
-        "cidme": "^0.5.0",
-        "commander": "^2.18.0",
-        "inquirer": "^6.2.0",
-        "uuidjs": "^4.0.3"
+        "ajv": "^6.12.3",
+        "cidme": "^0.6.0",
+        "commander": "^2.20.3",
+        "inquirer": "^6.5.2",
+        "jsonld": "^3.1.1",
+        "n3": "^1.5.0",
+        "sqlite": "^4.0.11",
+        "sqlite3": "^4.2.0",
+        "uuidjs": "^4.2.5"
     }
 }
